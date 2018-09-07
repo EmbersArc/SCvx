@@ -1,8 +1,11 @@
 # SuccessiveConvexification
-Implementation of [Successive Convexification for 6-DoF Mars Rocket Powered Landing with Free-Final-Time](https://arxiv.org/abs/1802.03827)
+Implementation of [Successive Convexification: A Superlinearly Convergent Algorithm for Non-convex Optimal Control Problems
+](https://arxiv.org/abs/1804.06539)
 
-[Short Video Example](https://gfycat.com/HideousUniqueEthiopianwolf)
+Rocket trajectory model based on the
+[Successive Convexification for 6-DoF Mars Rocket Powered Landing with Free-Final-Time](https://arxiv.org/abs/1802.03827)
+by Michael Szmuk and Behçet Açıkmeşe.
+
+[Video example of generated trajectories](https://gfycat.com/InbornCoarseArcticseal)
 
 Reqires `matplotlib`, `numpy`, `scipy` and `cvxpy`.
-
-[C++ implementation WIP](https://github.com/EmbersArc/SuccessiveConvexificationCpp)
