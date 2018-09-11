@@ -82,10 +82,10 @@ class Rocket_Landing_3D:
     r_T_B = np.array([-14, 0., 0.])  # -20 m
 
     def set_random_initial_state(self):
-        self.r_I_init[0] = 600
+        self.r_I_init[0] = 300
         self.r_I_init[1:3] = np.random.uniform(-200, 200, size=2)
 
-        self.v_I_init[0] = np.random.uniform(-200, -80)
+        self.v_I_init[0] = np.random.uniform(-100, -60)
         self.v_I_init[1:3] = np.random.uniform(-0.5, -0.2, size=2) * self.r_I_init[1:3]
 
         self.q_B_I_init = euler_to_quat((0,

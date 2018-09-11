@@ -21,7 +21,7 @@ def my_plot(fig, figures_i):
     ax.set_ylabel('Y')
     ax.set_aspect('equal')
 
-    ax.set_title("iter " + str(figures_i))
+    ax.set_title("Iteration " + str(figures_i))
 
     ax.plot(X_i[0, :], X_i[1, :], color='lightgrey', zorder=0)
 

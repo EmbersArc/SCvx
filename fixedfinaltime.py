@@ -32,8 +32,8 @@ sigma = m.t_f_guess
 X, U = m.initialize_trajectory(X, U)
 
 # START SUCCESSIVE CONVEXIFICATION--------------------------------------------------------------------------------------
-all_X = [X]
-all_U = [U]
+all_X = [m.x_redim(X.copy())]
+all_U = [m.u_redim(U.copy())]
 
 integrator = FirstOrderHold(m, K, sigma)
 problem = SCProblem(m, K)

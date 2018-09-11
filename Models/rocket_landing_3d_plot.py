@@ -62,11 +62,10 @@ def my_plot(fig, figures_i):
         # thrust vector
         ax.quiver(ry, rz, rx, -Fy, -Fz, -Fx, length=thrust_scale, arrow_length_ratio=0.0, color='red')
 
-    scale = np.max(np.abs(X_i[2:4, :]))
-    ax.set_xlim(-scale, scale)
-    ax.set_ylim(-scale, scale)
+    scale = X_i[1, 0]
+    ax.auto_scale_xyz([-scale/2, scale/2], [-scale/2, scale/2], [0, scale])
 
-    ax.set_title("iter " + str(figures_i))
+    ax.set_title("Iteration " + str(figures_i))
     ax.plot(X_i[2, :], X_i[3, :], X_i[1, :], color='black')
 
 
