@@ -9,3 +9,10 @@ by Michael Szmuk and Behçet Açıkmeşe.
 [Video example of generated trajectories](https://gfycat.com/InbornCoarseArcticseal)
 
 Reqires `matplotlib`, `numpy`, `scipy` and `cvxpy`.
+
+Rocket landing with free final time:
+![](https://i.imgur.com/n5BGX9J.png)
+
+Differential drive robot path planning:
+![](https://i.imgur.com/s7lZJTX.png)
+
