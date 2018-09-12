@@ -1,8 +1,8 @@
 # Trajectory points
-K = 50
+K = 30
 
 # Max solver iterations
-iterations = 30
+iterations = 50
 
-solver = ['ECOS', 'MOSEK', 'QSQP'][0]
+solver = ['ECOS', 'MOSEK'][0]
 verbose_solver = False

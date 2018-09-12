@@ -6,11 +6,12 @@ from FixedFinalTime.discretization import FirstOrderHold
 from FixedFinalTime.scproblem import SCProblem
 from utils import format_line, save_arrays
 
-# from Models.diffdrive_2d import DiffDrive2D
-# from Models.diffdrive_2d_plot import plot2d
+from Models.diffdrive_2d import Model
+from Models.diffdrive_2d_plot import plot
 
-from Models.rocket_landing_3d import Rocket_Landing_3D
-from Models.rocket_landing_3d_plot import plot3d
+# from Models.rocket_landing_3d import Model
+# from Models.rocket_landing_3d_plot import plot
+
 """
 Python implementation of the Successive Convexification algorithm.
 
@@ -21,7 +22,8 @@ by Michael Szmuk and Behçet Açıkmeşe.
 Implementation by Sven Niederberger (s-niederberger@outlook.com)
 """
 
-m = Rocket_Landing_3D()
+m = Model()
+m.nondimensionalize()
 
 # state and input
 X = np.empty(shape=[m.n_x, K])
@@ -91,7 +93,7 @@ for it in range(iterations):
         print(format_line('Predicted change', predicted_change))
         print('')
 
-        if abs(actual_change) < 1e-5:
+        if abs(predicted_change) < 1e-4:
             converged = True
             break
         else:
@@ -134,9 +136,13 @@ for it in range(iterations):
 
 all_X = np.stack(all_X)
 all_U = np.stack(all_U)
+all_sigma = np.ones(K) * sigma
+
+if not converged:
+    print('Maximum number of iterations reached without convergence.')
 
 # save trajectory to file for visualization
-save_arrays('output/trajectory/', {'X': all_X, 'U': all_U, 'sigma': sigma})
+save_arrays('output/trajectory/', {'X': all_X, 'U': all_U, 'sigma': all_sigma})
 
 # plot trajectory
-plot3d(all_X, all_U)
+plot(all_X, all_U, all_sigma)

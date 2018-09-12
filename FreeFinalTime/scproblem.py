@@ -55,8 +55,7 @@ class SCProblem:
         du = self.var['U'] - self.par['U_last']
         dx = self.var['X'] - self.par['X_last']
         ds = self.var['sigma'] - self.par['sigma_last']
-        constraints += [cvx.norm(dx, 1) <= self.par['tr_radius']]
-        constraints += [cvx.norm(ds, 1) <= self.par['tr_radius']]
+        constraints += [cvx.norm(dx, 1) + cvx.norm(du, 1) + cvx.norm(ds, 1) <= self.par['tr_radius']]
 
         # Objective:
         model_objective = m.get_objective(self.var['X'], self.var['U'], self.par['X_last'], self.par['U_last'])

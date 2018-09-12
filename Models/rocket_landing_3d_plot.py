@@ -69,7 +69,7 @@ def my_plot(fig, figures_i):
     ax.plot(X_i[2, :], X_i[3, :], X_i[1, :], color='black')
 
 
-def plot3d(X_in, U_in):
+def plot(X_in, U_in, sigma_in):
     global figures_N
     figures_N = X_in.shape[0]
     figures_i = figures_N - 1
@@ -91,5 +91,6 @@ if __name__ == "__main__":
 
     X_in = np.load(f"output/trajectory/{folder_number}/X.npy")
     U_in = np.load(f"output/trajectory/{folder_number}/U.npy")
+    sigma_in = np.load(f"output/trajectory/{folder_number}/sigma.npy")
 
-    plot3d(X_in, U_in)
+    plot(X_in, U_in, sigma_in)

@@ -47,12 +47,15 @@ class SCProblem:
         ]
 
         # Trust region:
+        du = self.var['U'] - self.par['U_last']
         dx = self.var['X'] - self.par['X_last']
-        constraints += [cvx.norm(dx, 1) <= self.par['tr_radius']]
+        constraints += [cvx.norm(dx, 1) + cvx.norm(du, 1) <= self.par['tr_radius']]
 
         # Objective:
         model_objective = m.get_objective(self.var['X'], self.var['U'], self.par['X_last'], self.par['U_last'])
-        sc_objective = cvx.Minimize(self.par['weight_nu'] * cvx.norm(self.var['nu'], 1))
+        sc_objective = cvx.Minimize(
+            self.par['weight_nu'] * cvx.norm(self.var['nu'], 1)
+        )
 
         objective = sc_objective if model_objective is None else sc_objective + model_objective
 

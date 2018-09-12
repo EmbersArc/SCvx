@@ -29,7 +29,7 @@ def omega(w):
     ])
 
 
-class Rocket_Landing_3D:
+class Model:
     """
     A 6 degree of freedom rocket landing problem.
     """
@@ -82,7 +82,7 @@ class Rocket_Landing_3D:
     r_T_B = np.array([-14, 0., 0.])  # -20 m
 
     def set_random_initial_state(self):
-        self.r_I_init[0] = 300
+        self.r_I_init[0] = 500
         self.r_I_init[1:3] = np.random.uniform(-200, 200, size=2)
 
         self.v_I_init[0] = np.random.uniform(-100, -60)
@@ -111,7 +111,7 @@ class Rocket_Landing_3D:
         self.r_scale = np.linalg.norm(self.r_I_init)
         self.m_scale = self.m_wet
 
-        self.nondimensionalize()
+        # self.nondimensionalize()
 
     def nondimensionalize(self):
         """ nondimensionalize all parameters and boundaries """

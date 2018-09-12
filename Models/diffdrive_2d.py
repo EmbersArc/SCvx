@@ -5,7 +5,7 @@ import sympy as sp
 from global_parameters import K
 
 
-class DiffDrive2D:
+class Model:
     """
     A 2D path planning problem.
     """
@@ -13,55 +13,85 @@ class DiffDrive2D:
     n_u = 2
 
     v_max = 1  # m/s
-    w_max = np.pi / 3  # rad/s
+    w_max = np.pi / 6  # rad/s
     upper_bound = 10.  # m
     lower_bound = -10.  # m
 
     robot_radius = 0.5  # m
 
-    r_init = np.array([-8, -8, 0])
-    r_final = np.array([8, 8, 0])
-
-    x_init = r_init
-    x_final = r_final
+    r_init = np.array([-8., -8., 0.])
+    r_final = np.array([8., 8., 0.])
 
     t_f_guess = 30  # s
 
-    # cylindrical obstacles [(x,y),r]
-    obstacles = [
-        [(5, 4), 3],
-        [(-5, -4), 3],
-        [(0, 0), 1],
-    ]
     # slack variables for artificial infeasibility
     s_prime = []
 
     def __init__(self):
+        self.x_init = self.r_init
+        self.x_final = self.r_final
+
+        self.r_scale = self.upper_bound - self.lower_bound
+
+        # cylindrical obstacles [(x,y),r]
+        self.obstacles = [
+            [[5., 4.], 3.],
+            [[-5., -4.], 3.],
+            [[0., 0.], 2.],
+        ]
+
         for _ in self.obstacles:
             self.s_prime.append(cvx.Variable((K, 1), nonneg=True))
 
     def nondimensionalize(self):
         """ nondimensionalize all parameters and boundaries """
-        pass
+
+        self.v_max /= self.r_scale
+        self.upper_bound /= self.r_scale
+        self.lower_bound /= self.r_scale
+        self.robot_radius /= self.r_scale
+
+        self.x_init = self.x_nondim(self.x_init)
+        self.x_final = self.x_nondim(self.x_final)
+
+        for j in range(len(self.obstacles)):
+            self.obstacles[j][0][0] /= self.r_scale
+            self.obstacles[j][0][1] /= self.r_scale
+            self.obstacles[j][1] /= self.r_scale
 
     def x_nondim(self, x):
         """ nondimensionalize a single x row """
+        x[0:2] /= self.r_scale
         return x
 
     def u_nondim(self, u):
-        """ nondimensionalize u, or in general any force in Newtons"""
-        pass
+        """ nondimensionalize u"""
+        u[0, :] /= self.r_scale
+        return u
 
     def redimensionalize(self):
         """ redimensionalize all parameters """
-        pass
+        self.v_max *= self.r_scale
+        self.upper_bound *= self.r_scale
+        self.lower_bound *= self.r_scale
+        self.robot_radius *= self.r_scale
+
+        self.x_init = self.x_nondim(self.x_init)
+        self.x_final = self.x_nondim(self.x_final)
+
+        for j in range(len(self.obstacles)):
+            self.obstacles[j][0][0] *= self.r_scale
+            self.obstacles[j][0][1] *= self.r_scale
+            self.obstacles[j][1] *= self.r_scale
 
     def x_redim(self, x):
         """ redimensionalize x, assumed to have the shape of a solution """
+        x[0:2, :] *= self.r_scale
         return x
 
     def u_redim(self, u):
         """ redimensionalize u """
+        u[0, :] *= self.r_scale
         return u
 
     def get_equations(self):
@@ -102,8 +132,7 @@ class DiffDrive2D:
             alpha2 = k / K
             X[:, k] = self.x_init * alpha1 + self.x_final * alpha2
 
-        U[0, :] = self.v_max / 2
-        U[1, :] = 0
+        U[:, :] = 0
 
         return X, U
 
@@ -122,7 +151,8 @@ class DiffDrive2D:
         for j in range(len(self.obstacles)):
             slack += cvx.norm(self.s_prime[j], 1)
 
-        objective = cvx.Minimize(1e5 * slack + cvx.sum(cvx.square(U_v)))
+        objective = cvx.Minimize(1e5 * slack)
+        # objective += cvx.Minimize(cvx.sum(cvx.square(U_v)))
         return objective
 
     def get_constraints(self, X_v, U_v, X_last_p, U_last_p):
