@@ -41,16 +41,16 @@ class Model:
     m_dry = 22000.  # 22000 kg
 
     # Flight time guess
-    t_f_guess = 12.  # 10 s
+    t_f_guess = 15.  # 10 s
 
     # State constraints
-    r_I_init = np.array((200., 200., 0.))  # 2000 m, 200 m, 200 m
+    r_I_init = np.array((0., 200., 200.))  # 2000 m, 200 m, 200 m
     v_I_init = np.array((-50., -100., -50.))  # -300 m/s, 50 m/s, 50 m/s
     q_B_I_init = euler_to_quat((0, 0, 0))
     w_B_init = np.deg2rad(np.array((0., 0., 0.)))
 
     r_I_final = np.array((0., 0., 0.))
-    v_I_final = np.array((-5, 0., 0.))
+    v_I_final = np.array((0., 0., -5.))
     q_B_I_final = euler_to_quat((0, 0, 0))
     w_B_final = np.deg2rad(np.array((0., 0., 0.)))
 
@@ -67,33 +67,33 @@ class Model:
 
     # Thrust limits
     T_max = 800000.  # 800000 [kg*m/s^2]
-    T_min = T_max * 0.6
+    T_min = T_max * 0.2
 
     # Angular moment of inertia
-    J_B = np.diag([100000., 4000000., 4000000.])  # 100000 [kg*m^2], 4000000 [kg*m^2], 4000000 [kg*m^2]
+    J_B = np.diag([4000000., 4000000., 100000.])  # 100000 [kg*m^2], 4000000 [kg*m^2], 4000000 [kg*m^2]
 
     # Gravity
-    g_I = np.array((-9.81, 0., 0.))  # -9.81 [m/s^2]
+    g_I = np.array((0., 0., -9.81))  # -9.81 [m/s^2]
 
     # Fuel consumption
     alpha_m = 1 / (282 * 9.81)  # 1 / (282 * 9.81) [s/m]
 
     # Vector from thrust point to CoM
-    r_T_B = np.array([-14, 0., 0.])  # -20 m
+    r_T_B = np.array([0., 0., -14.])  # -20 m
 
     def set_random_initial_state(self):
-        self.r_I_init[0] = 500
-        self.r_I_init[1:3] = np.random.uniform(-200, 200, size=2)
+        self.r_I_init[2] = 500
+        self.r_I_init[0:2] = np.random.uniform(-200, 200, size=2)
 
-        self.v_I_init[0] = np.random.uniform(-100, -60)
-        self.v_I_init[1:3] = np.random.uniform(-0.5, -0.2, size=2) * self.r_I_init[1:3]
+        self.v_I_init[2] = np.random.uniform(-100, -60)
+        self.v_I_init[0:2] = np.random.uniform(-0.5, -0.2, size=2) * self.r_I_init[0:2]
 
-        self.q_B_I_init = euler_to_quat((0,
+        self.q_B_I_init = euler_to_quat((np.random.uniform(-30, 30),
                                          np.random.uniform(-30, 30),
-                                         np.random.uniform(-30, 30)))
-        self.w_B_init = np.deg2rad((0,
+                                         0))
+        self.w_B_init = np.deg2rad((np.random.uniform(-20, 20),
                                     np.random.uniform(-20, 20),
-                                    np.random.uniform(-20, 20)))
+                                    0))
 
     # ------------------------------------------ Start normalization stuff
     def __init__(self):
@@ -270,14 +270,14 @@ class Model:
         constraints += [
             # State constraints:
             X_v[0, :] >= self.m_dry,  # minimum mass
-            cvx.norm(X_v[2: 4, :], axis=0) <= X_v[1, :] / self.tan_gamma_gs,  # glideslope
-            cvx.norm(X_v[9:11, :], axis=0) <= np.sqrt((1 - self.cos_theta_max) / 2),  # maximum angle
+            cvx.norm(X_v[1: 3, :], axis=0) <= X_v[3, :] / self.tan_gamma_gs,  # glideslope
+            cvx.norm(X_v[8:10, :], axis=0) <= np.sqrt((1 - self.cos_theta_max) / 2),  # maximum angle
             cvx.norm(X_v[11: 14, :], axis=0) <= self.w_B_max,  # maximum angular velocity
 
             # Control constraints:
-            cvx.norm(U_v[1:3, :], axis=0) <= self.tan_delta_max * U_v[0, :],  # gimbal angle constraint
+            cvx.norm(U_v[0:2, :], axis=0) <= self.tan_delta_max * U_v[2, :],  # gimbal angle constraint
             cvx.norm(U_v, axis=0) <= self.T_max,  # upper thrust constraint
-            U_v[0, :] >= self.T_min  # simple lower thrust constraint
+            U_v[2, :] >= self.T_min  # simple lower thrust constraint
         ]
 
         # # linearized lower thrust constraint
