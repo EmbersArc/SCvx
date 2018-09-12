@@ -14,5 +14,5 @@ Rocket landing with free final time:
 ![](https://i.imgur.com/n5BGX9J.png)
 
 Differential drive robot path planning:
-![](https://i.imgur.com/s7lZJTX.png)
+![](https://i.imgur.com/KluFfA5.png)
 
