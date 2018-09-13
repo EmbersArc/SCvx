@@ -7,7 +7,7 @@ Reqires `matplotlib`, `numpy`, `scipy` and `cvxpy`.
 
 This framework provides an easy way to implement your own models.
 
-Fixed- and free-final time optimization is possible.
+Fixed- and free-final-time optimization is possible.
 
 The following models are currently implemented:
 
@@ -21,4 +21,3 @@ by Michael Szmuk and Behçet Açıkmeşe.
 
 - Differential drive robot path planning with free-final-time and non-convex obstacle constraints:
 ![](https://i.imgur.com/xNaD5eP.png)
-
