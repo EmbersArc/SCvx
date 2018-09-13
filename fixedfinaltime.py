@@ -40,7 +40,6 @@ integrator = FirstOrderHold(m, K, sigma)
 problem = SCProblem(m, K)
 
 last_nonlinear_cost = None
-
 converged = False
 for it in range(iterations):
     t0_it = time()
@@ -57,7 +56,7 @@ for it in range(iterations):
                            weight_nu=w_nu, tr_radius=tr_radius)
 
     while True:
-        error = problem.solve(verbose=verbose_solver, solver=solver)
+        error = problem.solve(verbose=verbose_solver, solver=solver, max_iters=200)
         print(format_line('Solver Error', error))
 
         # get solution

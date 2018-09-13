@@ -302,7 +302,6 @@ class Model:
         return cost
 
     def get_nonlinear_cost(self, X=None, U=None):
-        print(self.T_min)
         magnitude = np.linalg.norm(U, 2, axis=0)
         is_violated = magnitude < self.T_min
         violation = self.T_min - magnitude

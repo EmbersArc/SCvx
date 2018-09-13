@@ -41,7 +41,6 @@ integrator = FirstOrderHold(m, K)
 problem = SCProblem(m, K)
 
 last_nonlinear_cost = None
-
 converged = False
 for it in range(iterations):
     t0_it = time()
@@ -72,10 +71,10 @@ for it in range(iterations):
         nonlinear_cost_dynamics = np.linalg.norm(new_X - X_nl, 1)
 
         linear_cost_constraints = m.get_linear_cost()
-        nonlinear_cost_constraints = m.get_nonlinear_cost(new_X, new_U)
+        nonlinear_cost_constraints = m.get_nonlinear_cost(X=new_X, U=new_U)
 
         linear_cost = linear_cost_dynamics + linear_cost_constraints  # J
-        nonlinear_cost = nonlinear_cost_dynamics + nonlinear_cost_constraints # L
+        nonlinear_cost = nonlinear_cost_dynamics + nonlinear_cost_constraints  # L
 
         if last_nonlinear_cost is None:
             last_nonlinear_cost = nonlinear_cost
@@ -84,7 +83,7 @@ for it in range(iterations):
             sigma = new_sigma
             break
 
-        actual_change = last_nonlinear_cost - nonlinear_cost # delta_J
+        actual_change = last_nonlinear_cost - nonlinear_cost  # delta_J
         predicted_change = last_nonlinear_cost - linear_cost  # delta_L
 
         print('')
@@ -97,7 +96,7 @@ for it in range(iterations):
         print(format_line('Final time', sigma))
         print('')
 
-        if abs(predicted_change) < 1e-5:
+        if abs(predicted_change) < 1e-4:
             converged = True
             break
         else:
@@ -142,7 +141,7 @@ for it in range(iterations):
 
 all_X = np.stack(all_X)
 all_U = np.stack(all_U)
-
+all_sigma = np.array(all_sigma)
 if not converged:
     print('Maximum number of iterations reached without convergence.')
 
