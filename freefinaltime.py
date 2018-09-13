@@ -6,11 +6,10 @@ from FreeFinalTime.discretization import FirstOrderHold
 from FreeFinalTime.scproblem import SCProblem
 from utils import format_line, save_arrays
 
-from Models.diffdrive_2d import Model
-from Models.diffdrive_2d_plot import plot
-
-# from Models.rocket_landing_3d import Model
-# from Models.rocket_landing_3d_plot import plot
+# from Models.diffdrive_2d import Model
+# from Models.diffdrive_2d_plot import plot
+from Models.rocket_landing_3d import Model
+from Models.rocket_landing_3d_plot import plot
 
 """
 Python implementation of the Successive Convexification algorithm.
@@ -59,7 +58,7 @@ for it in range(iterations):
                            weight_nu=w_nu, weight_sigma=w_sigma, tr_radius=tr_radius)
 
     while True:
-        error = problem.solve(verbose=verbose_solver, solver=solver)
+        error = problem.solve(verbose=verbose_solver, solver=solver, max_iters=200)
         print(format_line('Solver Error', error))
 
         # get solution
@@ -67,7 +66,7 @@ for it in range(iterations):
         new_U = problem.get_variable('U')
         new_sigma = problem.get_variable('sigma')
 
-        X_nl = integrator.integrate_nonlinear_piecewise(new_X, new_U, sigma)
+        X_nl = integrator.integrate_nonlinear_piecewise(new_X, new_U, new_sigma)
 
         linear_cost_dynamics = np.linalg.norm(problem.get_variable('nu'), 1)
         nonlinear_cost_dynamics = np.linalg.norm(new_X - X_nl, 1)
@@ -76,7 +75,7 @@ for it in range(iterations):
         nonlinear_cost_constraints = m.get_nonlinear_cost(new_X, new_U)
 
         linear_cost = linear_cost_dynamics + linear_cost_constraints  # J
-        nonlinear_cost = nonlinear_cost_dynamics + nonlinear_cost_constraints  # L
+        nonlinear_cost = nonlinear_cost_dynamics + nonlinear_cost_constraints # L
 
         if last_nonlinear_cost is None:
             last_nonlinear_cost = nonlinear_cost
@@ -85,7 +84,7 @@ for it in range(iterations):
             sigma = new_sigma
             break
 
-        actual_change = last_nonlinear_cost - nonlinear_cost  # delta_J
+        actual_change = last_nonlinear_cost - nonlinear_cost # delta_J
         predicted_change = last_nonlinear_cost - linear_cost  # delta_L
 
         print('')
@@ -98,7 +97,7 @@ for it in range(iterations):
         print(format_line('Final time', sigma))
         print('')
 
-        if abs(predicted_change) < 1e-4:
+        if abs(predicted_change) < 1e-5:
             converged = True
             break
         else:

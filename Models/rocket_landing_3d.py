@@ -2,6 +2,7 @@ import sympy as sp
 import numpy as np
 import cvxpy as cvx
 from utils import euler_to_quat
+from global_parameters import K
 
 
 def skew(v):
@@ -62,12 +63,13 @@ class Model:
     glidelslope_angle = 20
 
     tan_delta_max = np.tan(np.deg2rad(max_gimbal))
+    cos_delta_max = np.tan(np.deg2rad(max_gimbal))
     cos_theta_max = np.cos(np.deg2rad(max_angle))
     tan_gamma_gs = np.tan(np.deg2rad(glidelslope_angle))
 
     # Thrust limits
     T_max = 800000.  # 800000 [kg*m/s^2]
-    T_min = T_max * 0.2
+    T_min = T_max * 0.4
 
     # Angular moment of inertia
     J_B = np.diag([4000000., 4000000., 100000.])  # 100000 [kg*m^2], 4000000 [kg*m^2], 4000000 [kg*m^2]
@@ -83,7 +85,7 @@ class Model:
 
     def set_random_initial_state(self):
         self.r_I_init[2] = 500
-        self.r_I_init[0:2] = np.random.uniform(-200, 200, size=2)
+        self.r_I_init[0:2] = np.random.uniform(-300, 300, size=2)
 
         self.v_I_init[2] = np.random.uniform(-100, -60)
         self.v_I_init[0:2] = np.random.uniform(-0.5, -0.2, size=2) * self.r_I_init[0:2]
@@ -111,7 +113,11 @@ class Model:
         self.r_scale = np.linalg.norm(self.r_I_init)
         self.m_scale = self.m_wet
 
-        # self.nondimensionalize()
+        # slack variable for linear constraint relaxation
+        self.s_prime = cvx.Variable((K, 1), nonneg=True)
+
+        # slack variable for lossless convexification
+        # self.gamma = cvx.Variable(K, nonneg=True)
 
     def nondimensionalize(self):
         """ nondimensionalize all parameters and boundaries """
@@ -192,7 +198,7 @@ class Model:
         f[1:4, 0] = x[4:7, 0]
         f[4:7, 0] = 1 / x[0, 0] * C_I_B * u + g_I
         f[7:11, 0] = 1 / 2 * omega(x[11:14, 0]) * x[7: 11, 0]
-        f[11:14, 0] = J_B ** -1 * (skew(r_T_B) * u - skew(x[11:14, 0]) * J_B * x[11:14, 0])
+        f[11:14, 0] = J_B ** -1 * (skew(r_T_B) * u) - skew(x[11:14, 0]) * x[11:14, 0]
 
         f = sp.simplify(f)
         A = sp.simplify(f.jacobian(x))
@@ -212,7 +218,6 @@ class Model:
         :param U: Numpy array of inputs to be initialized
         :return: The initialized X and U
         """
-        K = X.shape[1]
 
         for k in range(K):
             alpha1 = (K - k) / K
@@ -225,7 +230,7 @@ class Model:
             w_B_k = alpha1 * self.x_init[11:14] + alpha2 * self.x_final[11:14]
 
             X[:, k] = np.concatenate((m_k, r_I_k, v_I_k, q_B_I_k, w_B_k))
-            U[:, k] = m_k * -self.g_I
+            U[:, k] = (self.T_max - self.T_min) / 2 * np.array([0, 0, 1])
 
         return X, U
 
@@ -239,10 +244,7 @@ class Model:
         :param U_last_p: cvx parameter for last inputs
         :return: A cvx objective function.
         """
-        # objective = cvx.Minimize(100 * cvx.norm(X_v[2:4, -1]))
-        # objective = cvx.Minimize(cvx.sum(cvx.norm(U_v, axis=0)))
-        objective = None
-        return objective
+        return cvx.Minimize(1e5 * cvx.sum(self.s_prime))
 
     def get_constraints(self, X_v, U_v, X_last_p, U_last_p):
         """
@@ -276,20 +278,33 @@ class Model:
 
             # Control constraints:
             cvx.norm(U_v[0:2, :], axis=0) <= self.tan_delta_max * U_v[2, :],  # gimbal angle constraint
+            # self.cos_delta_max * self.gamma <= U_v[2, :],
+
             cvx.norm(U_v, axis=0) <= self.T_max,  # upper thrust constraint
-            U_v[2, :] >= self.T_min  # simple lower thrust constraint
+            # U_v[2, :] >= self.T_min  # simple lower thrust constraint
+
+            # # Lossless convexification:
+            # self.gamma <= self.T_max,
+            # self.T_min <= self.gamma,
+            # cvx.norm(U_v, axis=0) <= self.gamma
         ]
 
-        # # linearized lower thrust constraint
-        # rhs = [U_last_p[:, k] / cvx.norm(U_last_p[:, k]) * U_v[:, k] for k in range(X_v.shape[1])]
-        # constraints += [
-        #     self.T_min <= cvx.vstack(rhs)
-        # ]
+        # linearized lower thrust constraint
+        lhs = [U_last_p[:, k] / (cvx.norm(U_last_p[:, k])) * U_v[:, k] for k in range(K)]
+        constraints += [
+            self.T_min - cvx.vstack(lhs) <= self.s_prime
+        ]
 
         return constraints
 
     def get_linear_cost(self):
-        return 0
+        cost = np.sum(self.s_prime.value)
+        return cost
 
-    def get_nonlinear_cost(self, X, U=None):
-        return 0
+    def get_nonlinear_cost(self, X=None, U=None):
+        print(self.T_min)
+        magnitude = np.linalg.norm(U, 2, axis=0)
+        is_violated = magnitude < self.T_min
+        violation = self.T_min - magnitude
+        cost = np.sum(is_violated * violation)
+        return cost

@@ -6,11 +6,10 @@ from FixedFinalTime.discretization import FirstOrderHold
 from FixedFinalTime.scproblem import SCProblem
 from utils import format_line, save_arrays
 
-from Models.diffdrive_2d import Model
-from Models.diffdrive_2d_plot import plot
-
-# from Models.rocket_landing_3d import Model
-# from Models.rocket_landing_3d_plot import plot
+# from Models.diffdrive_2d import Model
+# from Models.diffdrive_2d_plot import plot
+from Models.rocket_landing_3d import Model
+from Models.rocket_landing_3d_plot import plot
 
 """
 Python implementation of the Successive Convexification algorithm.
@@ -71,7 +70,7 @@ for it in range(iterations):
         nonlinear_cost_dynamics = np.linalg.norm(new_X - X_nl, 1)
 
         linear_cost_constraints = m.get_linear_cost()
-        nonlinear_cost_constraints = m.get_nonlinear_cost(new_X, new_U)
+        nonlinear_cost_constraints = m.get_nonlinear_cost(X=new_X, U=new_U)
 
         linear_cost = linear_cost_dynamics + linear_cost_constraints  # J
         nonlinear_cost = nonlinear_cost_dynamics + nonlinear_cost_constraints  # L
@@ -93,7 +92,7 @@ for it in range(iterations):
         print(format_line('Predicted change', predicted_change))
         print('')
 
-        if abs(predicted_change) < 1e-4:
+        if abs(predicted_change) < 1e-6:
             converged = True
             break
         else:

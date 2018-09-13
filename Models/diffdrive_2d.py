@@ -149,7 +149,7 @@ class Model:
 
         slack = 0
         for j in range(len(self.obstacles)):
-            slack += cvx.norm(self.s_prime[j], 1)
+            slack += cvx.sum(self.s_prime[j])
 
         objective = cvx.Minimize(1e5 * slack)
         # objective += cvx.Minimize(cvx.sum(cvx.square(U_v)))
@@ -192,7 +192,7 @@ class Model:
             p = obst[0]
             r = obst[1] + self.robot_radius
 
-            lhs = [(X_last_p[0:2, k] - p) / (cvx.norm((X_last_p[0:2, k] - p)) + 1e-5) * (X_v[0:2, k] - p)
+            lhs = [(X_last_p[0:2, k] - p) / (cvx.norm((X_last_p[0:2, k] - p)) + 1e-6) * (X_v[0:2, k] - p)
                    for k in range(K)]
             constraints += [r - cvx.vstack(lhs) <= self.s_prime[j]]
         return constraints
@@ -208,5 +208,7 @@ class Model:
         for obst in self.obstacles:
             vector_to_obstacle = X[0:2, :].T - obst[0]
             dist_to_obstacle = np.linalg.norm(vector_to_obstacle, 2, axis=1)
-            cost += np.sum((dist_to_obstacle < obst[1] + self.robot_radius) * dist_to_obstacle)
+            is_violated = dist_to_obstacle < obst[1] + self.robot_radius
+            violation = obst[1] + self.robot_radius - dist_to_obstacle
+            cost += np.sum(is_violated * violation)
         return cost

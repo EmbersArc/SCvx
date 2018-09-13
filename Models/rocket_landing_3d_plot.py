@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import collections as mc
-from mpl_toolkits import mplot3d
+from mpl_toolkits.mplot3d import art3d
 
 figures_i = 0
 
@@ -41,7 +40,6 @@ def my_plot(fig, figures_i):
 
     for k in range(K):
         rx, ry, rz = X_i[1:4, k]
-        vx, vy, vz = X_i[4:7, k]
         qw, qx, qy, qz = X_i[7:11, k]
 
         CBI = np.array([
@@ -53,9 +51,6 @@ def my_plot(fig, figures_i):
         dx, dy, dz = np.dot(np.transpose(CBI), np.array([0., 0., 1.]))
         Fx, Fy, Fz = np.dot(np.transpose(CBI), U_i[:, k])
 
-        # # speed vector
-        # ax.quiver(ry, rz, rx, vy, vz, vx, length=0.1, color='green')
-
         # attitude vector
         ax.quiver(rx, ry, rz, dx, dy, dz, length=attitude_scale, arrow_length_ratio=0.0, color='blue')
 
@@ -65,13 +60,13 @@ def my_plot(fig, figures_i):
     scale = X_i[3, 0]
     ax.auto_scale_xyz([-scale / 2, scale / 2], [-scale / 2, scale / 2], [0, scale])
 
-    p = plt.Circle((0, 0), 20, color='lightgray')
-    ax.add_patch(p)
-    mplot3d.art3d.pathpatch_2d_to_3d(p, z=0, zdir="z")
+    pad = plt.Circle((0, 0), 20, color='lightgray')
+    ax.add_patch(pad)
+    art3d.pathpatch_2d_to_3d(pad)
 
     ax.set_title("Iteration " + str(figures_i))
     ax.plot(X_i[1, :], X_i[2, :], X_i[3, :], color='lightgrey')
-
+    ax.set_aspect('equal')
 
 def plot(X_in, U_in, sigma_in):
     global figures_N
