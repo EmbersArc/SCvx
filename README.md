@@ -11,7 +11,7 @@ by Michael Szmuk and Behçet Açıkmeşe.
 Reqires `matplotlib`, `numpy`, `scipy` and `cvxpy`.
 
 Rocket landing with free final time:
-![](https://i.imgur.com/n5BGX9J.png)
+![](https://i.imgur.com/W6E0rgL.png)
 
 Differential drive robot path planning:
 ![](https://i.imgur.com/xNaD5eP.png)
