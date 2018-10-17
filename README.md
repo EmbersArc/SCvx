@@ -23,5 +23,4 @@ by Michael Szmuk and Behçet Açıkmeşe.
 ![](https://i.imgur.com/xNaD5eP.png)
 
 - 2D Rocket Landing problem
-Feed-forward input tested in a box2d physics simulation:
-![](https://gfycat.com/DaringPortlyBlacklab)
+![Feed-forward input tested in a box2d physics simulation](https://gfycat.com/DaringPortlyBlacklab)
