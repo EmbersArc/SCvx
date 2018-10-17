@@ -22,5 +22,5 @@ by Michael Szmuk and Behçet Açıkmeşe.
 - Differential drive robot path planning with free-final-time and non-convex obstacle constraints:
 ![](https://i.imgur.com/xNaD5eP.png)
 
-- 2D Rocket Landing problem
+- 2D rocket landing problem
 [Feed-forward input tested in a box2d physics simulation](https://gfycat.com/DaringPortlyBlacklab)
